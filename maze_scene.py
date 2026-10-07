@@ -58,6 +58,22 @@ def build_scene(maze, name, path_pts=None, out_dir=HERE, base_scene="scene.xml")
                     f'pos="{x} {y} {WALL_H/2}" rgba="0.55 0.55 0.6 1"/>'
                 )
                 wid += 1
+
+    # outer boundary walls: OUTSIDE the loops, runs once
+    t = 0.05                                   # half thickness
+    cx, cy = (cols - 1) / 2, (rows - 1) / 2    # centre of the grid
+    outer = [
+        ("wall_b_west",  -0.5 - t,        cy,              t,              rows / 2),
+        ("wall_b_east",  cols - 0.5 + t,  cy,              t,              rows / 2),
+        ("wall_b_south", cx,              -0.5 - t,        cols / 2 + t,   t),
+        ("wall_b_north", cx,              rows - 0.5 + t,  cols / 2 + t,   t),
+    ]
+    for nm, bx, by, hx, hy in outer:
+        lines.append(
+            f'    <geom name="{nm}" type="box" size="{hx} {hy} {WALL_H/2}" '
+            f'pos="{bx} {by} {WALL_H/2}" rgba="0.35 0.35 0.4 1"/>'
+        )
+
     sx, sy = grid_to_world(start[0], start[1], rows)
     gx, gy = grid_to_world(goal[0], goal[1], rows)
     lines.append(f'    <geom name="start_marker" type="cylinder" size="0.3 0.005" pos="{sx} {sy} 0.006" '
@@ -65,8 +81,8 @@ def build_scene(maze, name, path_pts=None, out_dir=HERE, base_scene="scene.xml")
     lines.append(f'    <geom name="goal_marker" type="cylinder" size="0.3 0.005" pos="{gx} {gy} 0.006" '
                  f'rgba="0.9 0.8 0 1" contype="0" conaffinity="0"/>')
     if path_pts is not None:
-        for i, (x, y) in enumerate(path_pts):
-            lines.append(f'    <geom name="path_{i}" type="cylinder" size="0.05 0.003" pos="{x} {y} 0.005" '
+        for i, (px, py) in enumerate(path_pts):
+            lines.append(f'    <geom name="path_{i}" type="cylinder" size="0.05 0.003" pos="{px} {py} 0.005" '
                          f'rgba="0.2 0.5 1 1" contype="0" conaffinity="0"/>')
     xml = (f'<mujoco model="a1 maze {name}">\n'
            f'  <include file="{base_scene}"/>\n'
